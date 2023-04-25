@@ -18,7 +18,7 @@ while True:
 
     # Receive the data sent by the client
     question = client_socket.recv(1024)
-
+    print(question)
     # Process the question and send back an answer
     answer = "This is the answer to your question: " + question.decode()
     client_socket.send(answer.encode())
