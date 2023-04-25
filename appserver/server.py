@@ -1,54 +1,27 @@
 import socket
-import threading
 
-HOST= socket.gethostbyname(socket.gethostname())
-PORT=9999
+# Create a socket object
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-server.bind((HOST,PORT))
+# Get local machine name
+host = socket.gethostname()
 
-server.listen()
+# Bind the socket to a public host and a well-known port
+server_socket.bind((host, 8000))
 
-clients=[]
-nicknames=[]
+# Listen for incoming connections
+server_socket.listen(1)
 
-def broadcast(message):
-	for client in clients:
-		client.send(message)
+while True:
+    # Wait for a client to connect
+    client_socket, addr = server_socket.accept()
 
-def handle_connection(client):
-	stop=False
-	while not stop:
-		try:
-			message=client.recv(1024)
-			broadcast(message)
-		except:
-			index=clients.index(client)
-			clients.remove(client)
-			nickname=nicknames[index]
-			nicknames.remove(nickname)
-			broadcast(f"{nickname} left the chat ".encode('utf-8'))
-			stop=True
+    # Receive the data sent by the client
+    question = client_socket.recv(1024)
 
-def main():
-	print("server is running...")
-	while True:
-		client,addr=server.accept()
-		print(f"Connected to {addr}")
-		
-		client.send("NICK".encode('utf-8'))
+    # Process the question and send back an answer
+    answer = "This is the answer to your question: " + question.decode()
+    client_socket.send(answer.encode())
 
-		nickname=client.recv(1024).decode('utf-8')
-		nicknames.append(nickname)
-		clients.append(client)
-		print(f"Nickname is {nickname}")
-
-		broadcast(f"{nickname} joined the chat ".encode('utf-8'))
-
-		client.send("you are now connected ".encode('utf-8'))
-
-		thread=threading.Thread(target=handle_connection, args=(client,))
-		thread.start()
-
-if __name__=='__main__':
-	main()
+    # Close the connection with the client
+    client_socket.close()
