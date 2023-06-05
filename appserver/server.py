@@ -1,16 +1,13 @@
 import socket
 ###############################KNN################################################################################
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score, accuracy_score, confusion_matrix ,classification_report
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
-import io 
+ 
 
-data  = pd.read_csv("D:/Master ALX/PFEAI/New dataset/dataset.csv")
-data_sevrity = pd.read_csv("D:/Master ALX/PFEAI/New dataset/Symptom-severity.csv")
+data  = pd.read_csv("New dataset/dataset.csv")
+data_sevrity = pd.read_csv("New dataset/Symptom-severity.csv")
 
 #convert data_severity to dictionnary
 data_dict = data_sevrity.set_index('Symptom').T.to_dict()
@@ -98,14 +95,16 @@ server_socket.bind((host, 8000))
 server_socket.listen(1)
 
 while True:
-    # Wait for a client to connect
+    print("Wait for a client to connect")
     client_socket, addr = server_socket.accept()
 
     # Receive the data sent by the client
     question = client_socket.recv(1024)
-
+    l=question.decode().split(',')
+    print(l)
+    res=detect_desease(l).tolist()
     # Process the question and send back an answer
-    answer = "This is the answer to your question: " + detect_desease(symptoms)
+    answer = "This is the answer to your question: " + res[0]
     client_socket.send(answer.encode())
 
     # Close the connection with the client
